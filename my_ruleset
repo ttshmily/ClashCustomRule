@@ -44,7 +44,6 @@ ruleset=🌍 优选国外,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/mast
 ruleset=🌍 优选国外,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Nintendo.list
 ruleset=📶 自动选择,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyMedia.list
 ruleset=📶 自动选择,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyGFWlist.list
-ruleset=🆘 谨防失联,https://raw.githubusercontent.com/ttshmily/ClashCustomRule/master/duangcloud.list
 ruleset=🏘️ 必须直连,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/LocalAreaNetwork.list
 ruleset=🏘️ 必须直连,[]GEOIP,CN
 ruleset=🎯 全球直连,[]FINAL
