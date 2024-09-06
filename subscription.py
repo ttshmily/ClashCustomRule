@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 MAX_RULESET_LINES = 999
 # SUBSCRIPTION_URL = 'https://dy.jrehnsdnsedgheshes.com/api/v1/client/subscribe?token=62c591b7d56d14e3562a086a12fb8aa0'
-SUBSCRIPTION_URL = 'https://fbapiv2.fbsublink.com/flydsubal/5bvneflpvhcenxed?list=shadowrocket&extend=1'
+SUBSCRIPTION_URL = 'https://fbapiv2.fbsublink.com/flydsubal/5bvneflpvhcenxed?sub=2&extend=1'
 CUSTOM_PROFILE_URL = 'https://raw.githubusercontent.com/ttshmily/ClashCustomRule/master/my_ruleset'
 
 logging.info(f"Subscription URL: {SUBSCRIPTION_URL}")
@@ -97,10 +97,14 @@ def parse_shadowsocks_url_new(ss_url: str) -> Optional[ProxyConfig]:
         cipher, host_part, port = base64.urlsafe_b64decode(encoded_part).decode('utf-8').split(':')
         password, server = host_part.split('@')
 
+        if not server:
+            logger.warning(f"Invalid Shadowsocks server: {name}")
+            return None
+
         return ProxyConfig(
             name=name,
             type='ss',
-            server=server,
+            server=server.replace('fbnode-all', 'pnd6xm1ljcfpc3b-fbnode'),
             port=int(port),
             cipher=cipher,
             password=password
