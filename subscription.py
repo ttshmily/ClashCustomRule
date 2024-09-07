@@ -98,7 +98,7 @@ def parse_shadowsocks_url_new(ss_url: str) -> Optional[ProxyConfig]:
     name = unquote(name_part).strip()
 
     try:
-        cipher, host_part, port = base64.urlsafe_b64decode(encoded_part).decode('utf-8').split(':')
+        cipher, host_part, port = base64.urlsafe_b64decode(encoded_part + '=').decode('utf-8').split(':')
         password, server = host_part.split('@')
 
         if not server:
