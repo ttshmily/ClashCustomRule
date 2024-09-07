@@ -9,7 +9,7 @@ import requests
 import logging
 import schedule
 import time
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from flask import Flask, request, jsonify, abort, send_file, make_response
 
@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 MAX_RULESET_LINES = 999
 # SUBSCRIPTION_URL = 'https://dy.jrehnsdnsedgheshes.com/api/v1/client/subscribe?token=62c591b7d56d14e3562a086a12fb8aa0'
-SUBSCRIPTION_URL = 'https://fbapiv2.fbsublink.com/flydsubal/5bvneflpvhcenxed?sub=2&extend=1'
+SUBSCRIPTION_URL = 'https://fbapiv2.fbsublink.com/flydsubal/2MnqdnLFGHCs5sLp?sub=2&extend=1'
 CUSTOM_PROFILE_URL = 'https://raw.githubusercontent.com/ttshmily/ClashCustomRule/master/my_ruleset'
 SUBSCRIPTION_USERINFO = None
 
