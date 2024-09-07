@@ -9,9 +9,9 @@ import requests
 import logging
 import schedule
 import time
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
-from flask import Flask, request, jsonify, abort, send_file
+from flask import Flask, request, jsonify, abort, send_file, make_response
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf-8')
 
@@ -19,6 +19,7 @@ MAX_RULESET_LINES = 999
 # SUBSCRIPTION_URL = 'https://dy.jrehnsdnsedgheshes.com/api/v1/client/subscribe?token=62c591b7d56d14e3562a086a12fb8aa0'
 SUBSCRIPTION_URL = 'https://fbapiv2.fbsublink.com/flydsubal/5bvneflpvhcenxed?sub=2&extend=1'
 CUSTOM_PROFILE_URL = 'https://raw.githubusercontent.com/ttshmily/ClashCustomRule/master/my_ruleset'
+SUBSCRIPTION_USERINFO = None
 
 logging.info(f"Subscription URL: {SUBSCRIPTION_URL}")
 logging.info(f"Default profile URL: {CUSTOM_PROFILE_URL}")
@@ -38,9 +39,12 @@ class ProxyConfig:
 
 
 def fetch_remote_content(url: str) -> Optional[str]:
+    global SUBSCRIPTION_USERINFO
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
+        if "subscription-userinfo" in response.headers.keys():
+            SUBSCRIPTION_USERINFO = response.headers['subscription-userinfo']
         return response.text.strip()
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching content from {url}: {e}")
@@ -57,31 +61,31 @@ def decode_clash_subscription(url: str) -> Optional[str]:
     return None
 
 
-def parse_shadowsocks_url(ss_url: str) -> Optional[ProxyConfig]:
-    if not ss_url.startswith('ss://'):
-        logger.warning(f"Invalid Shadowsocks URL: {ss_url}")
-        return None
-
-    ss_url = ss_url[5:]
-    encoded_part, name_part = ss_url.split('#', 1)
-    name = unquote(name_part).strip()
-
-    try:
-        cipher_password, server_port = encoded_part.split('@')
-        cipher, password = base64.urlsafe_b64decode(cipher_password).decode('utf-8').split(':')
-        server, port = server_port.split(':')
-
-        return ProxyConfig(
-            name=name,
-            type='ss',
-            server=server,
-            port=int(port),
-            cipher=cipher,
-            password=password
-        )
-    except Exception as e:
-        logger.error(f"Error parsing Shadowsocks URL: {e}")
-        return None
+# def parse_shadowsocks_url(ss_url: str) -> Optional[ProxyConfig]:
+#     if not ss_url.startswith('ss://'):
+#         logger.warning(f"Invalid Shadowsocks URL: {ss_url}")
+#         return None
+#
+#     ss_url = ss_url[5:]
+#     encoded_part, name_part = ss_url.split('#', 1)
+#     name = unquote(name_part).strip()
+#
+#     try:
+#         cipher_password, server_port = encoded_part.split('@')
+#         cipher, password = base64.urlsafe_b64decode(cipher_password).decode('utf-8').split(':')
+#         server, port = server_port.split(':')
+#
+#         return ProxyConfig(
+#             name=name,
+#             type='ss',
+#             server=server,
+#             port=int(port),
+#             cipher=cipher,
+#             password=password
+#         )
+#     except Exception as e:
+#         logger.error(f"Error parsing Shadowsocks URL: {e}")
+#         return None
 
 
 def parse_shadowsocks_url_new(ss_url: str) -> Optional[ProxyConfig]:
@@ -140,6 +144,7 @@ def load_clash_proxies(subscription_url: str, fallback_file_name: str = 'proxies
                 proxies.append(proxy_config.__dict__)
         config['proxies'] = proxies
         logger.info(f"Loaded YAML configuration from {subscription_url}")
+        logger.info(f"subscription_userinfo from {subscription_url}: {SUBSCRIPTION_USERINFO}")
         format_and_save_yaml(config, 'proxies.yaml')
     return config, proxy_names
 
@@ -300,7 +305,9 @@ def api_generate_clash_config():
     try:
         result = generate_config_to_file(subscription_url, custom_profile_url, fallback_file_path,
                                          output_file_path)
-        return jsonify(result), 200
+        response = jsonify(result)
+        response.status_code = 200
+        return response
     except Exception as e:
         logger.error(f"Error generating configuration: {str(e)}")
         return jsonify({"error": str(e)}), 500
@@ -315,7 +322,7 @@ def api_download_config(filename):
 
         # 检查文件是否存在
         if not os.path.exists(yaml_file_path):
-            safe_filename = 'custom.yaml'
+            safe_filename = 'proxies.yaml'
             yaml_file_path = os.path.join(root_dir, safe_filename)
 
         if not os.path.exists(yaml_file_path):
@@ -324,7 +331,9 @@ def api_download_config(filename):
         if not yaml_file_path.endswith('.yaml'):
             abort(403, description="Access denied")
         # 发送文件
-        return send_file(str(yaml_file_path), as_attachment=True, download_name=safe_filename)
+        response = make_response(send_file(str(yaml_file_path), as_attachment=True, download_name=safe_filename))
+        response.headers['subscription-userinfo'] = SUBSCRIPTION_USERINFO
+        return response
     except Exception as e:
         logger.error(f"Error downloading file: {str(e)}")
         abort(500, description="Internal server error")
