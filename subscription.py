@@ -101,9 +101,9 @@ def parse_shadowsocks_url_new(ss_url: str) -> Optional[ProxyConfig]:
         cipher, host_part, port = base64.urlsafe_b64decode(encoded_part + '=').decode('utf-8').split(':')
         password, server = host_part.split('@')
 
-        if not server:
-            logger.warning(f"Invalid Shadowsocks server: {name}")
-            return None
+        # if not server:
+        #     logger.warning(f"Invalid Shadowsocks server: {name}")
+        #     return None
 
         return ProxyConfig(
             name=name,
@@ -123,19 +123,7 @@ def load_clash_proxies(subscription_url: str, fallback_file_name: str = 'proxies
     config = {}
 
     subscription_content = decode_clash_subscription(subscription_url)
-    if not subscription_content:
-        if fallback_file_name:
-            try:
-                fallback_file_path = os.path.join(root_dir, fallback_file_name)
-                with open(fallback_file_path, 'r', encoding='utf-8') as source:
-                    config = yaml.safe_load(source)
-                logger.info(f"Loaded YAML configuration from {fallback_file_path}")
-                proxy_names = [proxy['name'] for proxy in config.get('proxies', [])
-                               if 'name' in proxy]
-                format_and_save_yaml(config, 'proxies.yaml')
-            except Exception as e:
-                logger.error(f"Error loading fallback file: {e}")
-    else:
+    if subscription_content:
         proxies = []
         for line in subscription_content.split('\n'):
             proxy_config = parse_shadowsocks_url_new(line)
@@ -146,6 +134,19 @@ def load_clash_proxies(subscription_url: str, fallback_file_name: str = 'proxies
         logger.info(f"Loaded YAML configuration from {subscription_url}")
         logger.info(f"subscription_userinfo from {subscription_url}: {SUBSCRIPTION_USERINFO}")
         format_and_save_yaml(config, 'proxies.yaml')
+    elif fallback_file_name:
+        try:
+            fallback_file_path = os.path.join(root_dir, fallback_file_name)
+            with open(fallback_file_path, 'r', encoding='utf-8') as source:
+                config = yaml.safe_load(source)
+            logger.info(f"Loaded YAML configuration from {fallback_file_path}")
+            proxy_names = [proxy['name'] for proxy in config.get('proxies', [])
+                           if 'name' in proxy]
+            format_and_save_yaml(config, 'proxies.yaml')
+        except Exception as e:
+            logger.error(f"Error loading fallback file: {e}")
+    else:
+        logger.error("No valid configuration found")
     return config, proxy_names
 
 
@@ -203,7 +204,7 @@ def parse_proxy_group(line: str, all_proxy_names: List[str]) -> Dict[str, Any]:
     for proxy in proxies:
         if not proxy.startswith('[]'):
             pattern = re.compile(proxy, re.IGNORECASE)
-            matched_proxies = [p for p in all_proxy_names if pattern.search(p)]
+            matched_proxies = [p for p in all_proxy_names if pattern.search(p) and p.find('：') == -1]
             group['proxies'].extend(matched_proxies)
         else:
             group['proxies'].append(proxy.strip('[]'))
@@ -262,6 +263,7 @@ def generate_config_to_file(subscription_url: str, custom_profile_url: str,
         basename_rocket_config = f"rocket_{os.path.basename(output_file_path)}"
         format_and_save_yaml(new_config, basename_rocket_config)
 
+        new_config['proxies'] = [r for r in new_config['proxies'] if r['server']]
         new_config['rules'] = [r for r in new_config['rules'] if
                                not r.startswith('USER-AGENT') and not r.startswith('URL-REGEX')]
         basename_clash_config = f"clash_{os.path.basename(output_file_path)}"
