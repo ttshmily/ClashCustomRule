@@ -1,0 +1,17 @@
+制作一个start_clash_config_service.bat文件，放置在clash的内核目录
+
+@echo off
+REM 切换到脚本所在目录
+cd /d "D:\PycharmProjects\jobhunter"
+
+REM 检查是否提供了端口参数
+if "%1"=="" (
+    REM 如果没有提供端口，使用默认值运行Python脚本
+    call .venv\Scripts\activate.bat && start /B python subscription.py %1
+) else (
+    REM 如果提供了端口，将其传递给Python脚本
+    call .venv\Scripts\activate.bat && start /B python ..\ClashCustomRule\subscription.py --port %1 --log_path "%~dp0 "
+)
+
+taskschd.msc
+
