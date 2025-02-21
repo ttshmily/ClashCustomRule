@@ -423,7 +423,7 @@ def log_buddha():
                    `=---='
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             佛祖保佑       永无BUG
-"""
+    """
     for line in buddha.split('\n'):
         logging.info(line)
 
