@@ -16,8 +16,7 @@ from flask import Flask, request, jsonify, abort, send_file, make_response
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf-8')
 
 MAX_RULESET_LINES = 999
-# SUBSCRIPTION_URL = 'https://dy.jrehnsdnsedgheshes.com/api/v1/client/subscribe?token=62c591b7d56d14e3562a086a12fb8aa0'
-SUBSCRIPTION_URL = 'https://fbapiv3.fbsublink.com/flydsubal/2mnqdnlfghcs5slp?sub=2&extend=1' # ss订阅链接，各设备通用
+SUBSCRIPTION_URL = 'https://fba01.fbsubcn01.cc:2096/flydsubal/fygimgommqar3sra?sub=2&extend=1' # ss订阅链接，各设备通用
 CUSTOM_PROFILE_URL = 'https://raw.githubusercontent.com/ttshmily/ClashCustomRule/master/my_ruleset'
 SUBSCRIPTION_USERINFO = None
 
