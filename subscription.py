@@ -16,7 +16,7 @@ from flask import Flask, request, jsonify, abort, send_file, make_response
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf-8')
 
 MAX_RULESET_LINES = 999
-SUBSCRIPTION_URL = 'https://fba01.fbsubcn01.cc:2096/flydsubal/fygimgommqar3sra?sub=2&extend=1' # ss订阅链接，各设备通用
+SUBSCRIPTION_URL = 'https://fba01.fbsubcn01.cc:2096/flydsubal/7nm1ebaxepdn2k2h?sub=2&extend=1' # ss订阅链接，各设备通用
 CUSTOM_PROFILE_URL = 'https://raw.githubusercontent.com/ttshmily/ClashCustomRule/master/my_ruleset'
 SUBSCRIPTION_USERINFO = None
 
@@ -438,7 +438,7 @@ if __name__ == "__main__":
     logger.info(f"Starting Service from： {root_dir}")
 
     # 设置定时任务，每1小时运行一次
-    schedule.every(1).hours.do(scheduled_config_update)
+    schedule.every(30).minutes.do(scheduled_config_update)
 
     # 在后台线程中运行定时任务
     import threading
